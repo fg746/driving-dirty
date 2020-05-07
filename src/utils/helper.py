@@ -85,6 +85,7 @@ def draw_box(ax, corners, color):
     ax.plot(point_squence.T[0] * 10 + 400, -point_squence.T[1] * 10 + 400, color=color)
 
 def compute_ats_bounding_boxes(boxes1, boxes2):
+    #return 
     # boxes1, boxes2 have dim [num_boxes, 2, 4]
 
     # save int num of boxes
@@ -138,6 +139,7 @@ def compute_ts_road_map(road_map1, road_map2):
     return tp * 1.0 / (road_map1.sum() + road_map2.sum() - tp)
 
 def compute_iou(box1, box2):
+    #return 
     a = Polygon(torch.t(box1)).convex_hull
     b = Polygon(torch.t(box2)).convex_hull
     
