@@ -48,6 +48,8 @@ def run_on_cluster(hyperparams):
 
     # email results if your hpc supports it
     cluster.notify_job_status(email='ab8690@nyu.edu', on_done=True, on_fail=True)
+    cluster.notify_job_status(email='nsk367@nyu.edu', on_done=True, on_fail=True)
+    cluster.notify_job_status(email='fg746@nyu.edu', on_done=True, on_fail=True)
     # any modules for code to run in env
     cluster.add_command(f'source activate {hyperparams.conda_env}')
     # pick the gpu resources
@@ -69,27 +71,28 @@ def run_on_cluster(hyperparams):
                                           job_name=job_display_name)
 
 if __name__ == '__main__':
+
     root_dir = os.path.split(os.path.dirname(sys.modules['__main__'].__file__))[0]
 
     parser = HyperOptArgumentParser(add_help=False, strategy='grid_search')
     parser = Trainer.add_argparse_args(parser)
-    parser.add_argument('--model', type=str, default='roadmap_bce')
+    parser.add_argument('--model', type=str, default='basic_ae')
 
     (temp_args, arr) = parser.parse_known_args()
     model_name = temp_args.model
     MODEL_CLASS = MODEL_NAMES[model_name]
-
     # give the module a chance to add own params
     # good practice to define LightningModule specific params in the module
     parser = MODEL_CLASS.add_model_specific_args(parser)
+    parser.add_argument('--gpus', default=1, type=int) 
     parser.add_argument('--nodes', type=int, default=1)
     parser.add_argument('--conda_env', type=str, default='driving-dirty')
     parser.add_argument('--on_cluster', default=True, action='store_true')
-    parser.add_argument('-n', '--tt_name', default='rm_bce_newckpt')
-    parser.add_argument('-d', '--tt_description', default='pretrained ae for feature extraction')
+    parser.add_argument('-n', '--tt_name', default='ae_noah_schedhid')
+    parser.add_argument('-d', '--tt_description', default='added scheduler and grid search hidden stuff')
     parser.add_argument('--logs_save_path', default='/scratch/ab8690/logs')
-    parser.add_argument('--single_run', dest='single_run', action='store_true')
-    parser.add_argument('--nb_hopt_trials', default=3, type=int)
+    parser.add_argument('--single_run', dest='singler_un', action='store_true')
+    parser.add_argument('--nb_hopt_trials', default=4, type=int) 
 
     # parse params
     hparams = parser.parse_args()

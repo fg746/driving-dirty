@@ -119,14 +119,14 @@ class BasicAE(LightningModule):
     def configure_optimizers(self):
         if scheduler: 
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateua(optimizer,patience=10)
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=10)
             return [optimizer], [scheduler]
         if not scheduler: 
             return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     def prepare_data(self):
         image_folder = self.hparams.link
-        unlabeled_scene_index = np.arange(106)
+        unlabeled_scene_index = np.arange(106) # the real way to do it is separate this
         trainset_size = round(0.8 * len(unlabeled_scene_index))
 
         # split into train / validation sets at the scene index level
@@ -166,11 +166,13 @@ class BasicAE(LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = HyperOptArgumentParser(parents=[parent_parser], add_help=False)
-        parser.opt_list('--hidden_dim', type=int, default=256, options=[256,128], tunable=False,
+        parser.opt_list('--hidden_dim', type=int, default=256, options=[256,128], tunable=True,
                             help='itermediate layers dimension before embedding for default encoder/decoder')
+        
         parser.opt_list('--latent_dim', type=int, default=128, options=[64, 128], tunable=True,
                             help='dimension of latent variables z')
-        parser.opt_list('--learning_rate', type=float, default=0.001, options=[1e-3, 1e-4, 1e-5], tunable=True)
+
+        parser.opt_list('--learning_rate', type=float, default=1e-3, options=[1e-3, 1e-4, 1e-5], tunable=False)
 
         parser.opt_list('--batch_size', type=int, default=16, options=[16], tunable=False)
 
@@ -184,6 +186,8 @@ class BasicAE(LightningModule):
         #parser.add_argument('--link', type=str, default='/Users/annika/Developer/driving-dirty/data')
         parser.add_argument('--output_img_freq', type=int, default=500)
         parser.add_argument('--scheduler',type=bool,default=True)
+
+
         return parser
 
 
@@ -192,7 +196,6 @@ if __name__ == '__main__':
     parser = Trainer.add_argparse_args(parser)
     parser = BasicAE.add_model_specific_args(parser)
     args = parser.parse_args()
-
     ae = BasicAE(args)
     trainer = Trainer.from_argparse_args(args)
     trainer.fit(ae)
