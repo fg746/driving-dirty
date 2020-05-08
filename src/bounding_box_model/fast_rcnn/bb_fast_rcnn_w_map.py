@@ -209,8 +209,12 @@ class FasterRCNNRoadMap(LightningModule):
     def  _change_coord_sys(self, boxes):
 
         # boxes dim: [N, 2, 4]
+        # first looking at x coordinates
+        # finding max x for each bounding box
         max_x = boxes[:, 0].max(dim=1)[0]
         min_x = boxes[:, 0].min(dim=1)[0]
+
+        # then looking at y coordinates
         max_y = boxes[:, 1].max(dim=1)[0]
         min_y = boxes[:, 1].min(dim=1)[0]
 
@@ -220,8 +224,8 @@ class FasterRCNNRoadMap(LightningModule):
         max_x = max_x*10 + 400
         min_x = min_x*10 + 400
 
-        max_y = -(max_y)*10 + 400
-        min_y = -(min_y)*10 + 400
+        max_y = -(max_y*10) + 400
+        min_y = -(min_y*10) + 400
 
         # output dim: [N, 4] where each box has [x1, x2, x3, x4]
         coords = torch.stack([min_x, min_y, max_x, max_y], dim=1)
